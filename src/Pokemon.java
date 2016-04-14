@@ -1,4 +1,4 @@
 
-public class Pokemon {//oi
+public class Pokemon {//
 
 }
