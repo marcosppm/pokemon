@@ -24,20 +24,19 @@ public class Battle extends Controller {
 		}
 		
 		public void action() {
-			int noTurnCurrHp = noTurn.getCurrent().getHp();
+			int noTurnCurrHp = noTurn.getPokCurrent().getHp();
 			int dan = turnChosenAttack.getDan();
-			noTurn.getCurrent().setHp(noTurnCurrHp - dan);
-			if (noTurn.getCurrent().getHp() == 0)
+			noTurn.getPokCurrent().setHp(noTurnCurrHp - dan);
+			if (noTurn.getPokCurrent().getHp() == 0)
 				dead = true;
-			changeTurn();
 		}
 		
 		public String description() {
-			return (turn.getName() + "'s turn: " + "Pokémon " + turn.getCurrent().getName() 
+			return (turn.getName() + "'s turn: " + "Pokémon " + turn.getPokCurrent().getName() 
 					+ " attacks (" + turnChosenAttack.getName() + ")!"
-					+ " " + noTurn.getName() + "'s Pokémon " + noTurn.getCurrent().getName()
-					+ " actual HP: " + noTurn.getCurrent().getHp() + "."
-					+ (dead ? " Pokémon " + noTurn.getCurrent().getName() + "" : ""));
+					+ " " + noTurn.getName() + "'s Pokémon " + noTurn.getPokCurrent().getName()
+					+ " actual HP: " + noTurn.getPokCurrent().getHp() + "."
+					+ (dead ? " Pokémon " + noTurn.getPokCurrent().getName() + "" : ""));
 		}
 	}
 	
@@ -46,13 +45,12 @@ public class Battle extends Controller {
 		
 		public ChangeCurrentPokemon(long eventTime, Pokemon nc) {
 			super(eventTime);
-			previous = turn.getCurrent();
+			previous = turn.getPokCurrent();
 			newCurrent = nc;
 		}
 		
 		public void action() {
-			turn.setCurrent(newCurrent);
-			changeTurn();
+			turn.setPokCurrent(newCurrent);
 		}
 		
 		public String description() {
@@ -70,23 +68,23 @@ public class Battle extends Controller {
 		}
 		
 		public void action() {
-			int actualPokHP = turn.getCurrent().getHp();
-			turn.getCurrent().setHp(actualPokHP + item.getHpCure());
+			int actualPokHP = turn.getPokCurrent().getHp();
+			turn.getPokCurrent().setHp(actualPokHP + item.getHpCure());
 			item.takeOff();
-			if (item.getQuantity() == 0)
-				item = null;
-			changeTurn();
 		}
 		
 		public String description() {
-			return (turn.getName() + "'s turn: Pokémon " + turn.getCurrent().getName() + " earned " + 
+			return (turn.getName() + "'s turn: Pokémon " + turn.getPokCurrent().getName() + " earned " + 
 					item.getHpCure() + " HP points.");
 		}
 	}
 	
 	private class RunAway extends Event {
-		public RunAway(long eventTime) {
+		private boolean pokemonsAreGone;
+		
+		public RunAway(long eventTime, boolean pokemonsAreGone) {
 			super(eventTime);
+			this.pokemonsAreGone = pokemonsAreGone;
 		}
 		
 		public void action() {
@@ -94,16 +92,13 @@ public class Battle extends Controller {
 		}
 		
 		public String description() {
-			return (turn.getName() + "'s turn: He has fled of the battle... Player " +
-					noTurn.getName() + " has won!!! :-)");
+			return (turn.getName() + "'s turn: He has fled of the battle... "
+					+ (pokemonsAreGone ? "His/her pokémons are gone. " : "")
+					+ "Player " + noTurn.getName() + " has won!!! :-)");
 		}
 	}
 	
 	private class StartBattle extends Event {
-		private Pokemon turnPokCurrent;
-		private Pokemon noTurnPokCurrent;
-		private int p1OrderAtt = 0, p2OrderAtt = 0;
-		private int p1OrderPok = 0, p2OrderPok = 0;
 		private boolean finished = false;
 		
 		public StartBattle(long eventTime) {
@@ -111,30 +106,74 @@ public class Battle extends Controller {
 		}
 		
 		public void action() {
+			int p1OrderPok = 0, p2OrderPok = 0;
+			int p1OrderAtt = 0, p2OrderAtt = 0;
+			int p1OrderItem = 0, p2OrderItem = 0;
+			boolean p1hasItems = true, p2hasItems = true;
+			
+			Pokemon p1PokCurr = player1.getPokCurrent();
+			Pokemon p2PokCurr = player2.getPokCurrent();
+			Attack p1AttCurr = p1PokCurr.getAttCurrent();
+			Attack p2AttCurr = p2PokCurr.getAttCurrent();
+			Item p1ItemCurr = player1.getItemCurrent();
+			Item p2ItemCurr = player2.getItemCurrent();
+			
 			while (!finished) {
-				turnPokCurrent = turn.getCurrent();
-				noTurnPokCurrent = noTurn.getCurrent();
-				
-				if (turnPokCurrent.getHp() > 10) {
-					int orderAttack = -1;
-					if (turn == player1) {
-						orderAttack = p1OrderAtt;
-						p1OrderAtt = (p1OrderAtt + 1) % turnPokCurrent.getAttacks().length;
+				if (p1PokCurr.isAlive()) {
+					if (p2PokCurr.isAlive()) {
+						
 					} else {
-						orderAttack = p2OrderAtt;
-						p2OrderAtt = (p2OrderAtt + 1) % turnPokCurrent.getAttacks().length;
-					}
-					addEvent(new Battle.AttackWithCurrent(
-							System.currentTimeMillis() + 500,
-							turnPokCurrent.getAttacks()[orderAttack]));
-				} else {
-					if (turnPokCurrent.getHp() == 0) {
-						if (turn == player1) {
+						if (++p2OrderPok == player2.getPokemons().length) {
+							// the pokémons of player2 are gone...
+							giveTurn(player2);
+							addEvent(new Battle.RunAway(
+									System.currentTimeMillis() + 500,
+									true));
+							giveTurn(player1);
+							finished = true;
+							
+						} else {
+							// player2 will change your pokémon
+							giveTurn(player2);
+							p2PokCurr = player2.getPokemons()[p2OrderPok];
 							addEvent(new Battle.ChangeCurrentPokemon(
 									System.currentTimeMillis() + 500,
-									player1.getPokemons()[p1OrderPok]));
+									p2PokCurr));
+							p2OrderAtt = 0;
+							p2AttCurr = p2PokCurr.getAttacks()[0];
+							p2PokCurr.setAttCurrent(p2AttCurr);
 							
+							giveTurn(player1);
+							if (p1PokCurr.getHp() > 20 || !p1hasItems) {
+								// player1 attacks!
+								addEvent(new Battle.AttackWithCurrent(
+										System.currentTimeMillis() + 1000,
+										p1AttCurr));
+								p1OrderAtt = (p1OrderAtt + 1) % p1PokCurr.getAttacks().length;
+								p1AttCurr = p1PokCurr.getAttacks()[p1OrderAtt];
+								p1PokCurr.setAttCurrent(p1AttCurr);
+								
+							} else {
+								// player1 uses item
+								addEvent(new Battle.UseItem(
+										System.currentTimeMillis() + 1000,
+										p1ItemCurr));
+								if (p1ItemCurr.getQuantity() == 0) {
+									if (++p1OrderItem == player1.getItems().length) {
+										p1hasItems = false;
+									} else {
+										p1ItemCurr = player1.getItems()[p1OrderItem];
+										player1.setItemCurrent(p1ItemCurr);
+									}
+								}	
+							}
 						}
+					}
+				} else {
+					if (p2PokCurr.getHp() > 0) {
+						
+					} else {
+						
 					}
 				}
 			}
@@ -145,13 +184,13 @@ public class Battle extends Controller {
 		}
 	}
 	
-	private void changeTurn() {
-		if (turn == player1) {
-			turn = player2;
-			noTurn = player1; 
-		} else {
+	private void giveTurn(Player pl) {
+		if (pl == player1) {
 			turn = player1;
-			noTurn = player2; 
+			noTurn = player2;
+		} else {
+			turn = player2;
+			noTurn = player1;
 		}
 	}
 	

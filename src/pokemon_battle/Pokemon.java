@@ -4,10 +4,14 @@ public class Pokemon {
 	private String name;
 	private int hp;
 	private Attack[] attacks = new Attack[4];
+	private Attack attCurrent;
 	
-	public Pokemon(String name, int hp) {
+	private Pokemon(String name, int hp, Attack[] attacks) {
+		super();
 		this.name = name;
 		this.hp = hp;
+		this.attacks = attacks;
+		this.attCurrent = this.attacks[0];
 	}
 
 	public String getName() {
@@ -16,6 +20,10 @@ public class Pokemon {
 
 	public int getHp() {
 		return hp;
+	}
+	
+	public boolean isAlive() {
+		return (hp > 0);
 	}
 
 	public void setHp(int hp) {
@@ -30,8 +38,12 @@ public class Pokemon {
 		return attacks;
 	}
 
-	public void setAttacks(Attack[] attacks) {
-		this.attacks = attacks;
+	public Attack getAttCurrent() {
+		return attCurrent;
+	}
+
+	public void setAttCurrent(Attack attCurrent) {
+		this.attCurrent = attCurrent;
 	}
 
 }

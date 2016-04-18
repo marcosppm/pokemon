@@ -3,14 +3,16 @@ package pokemon_battle;
 public class Player {
 	private String name;
 	private Pokemon[] pokemons = new Pokemon[6];
-	private Pokemon current;
+	private Pokemon pokCurrent;
 	private Item[] items;
+	private Item itemCurrent;
 	
 	public Player(String name, Pokemon[] pokemons, Item[] items) {
 		this.name = name;
 		this.pokemons = pokemons;
-		this.current = this.pokemons[0];
+		this.pokCurrent = this.pokemons[0];
 		this.items = items;
+		this.itemCurrent = this.items[0];
 	}
 
 	public String getName() {
@@ -21,16 +23,24 @@ public class Player {
 		return pokemons;
 	}
 
-	public Pokemon getCurrent() {
-		return current;
+	public Pokemon getPokCurrent() {
+		return pokCurrent;
 	}
 
-	public void setCurrent(Pokemon current) {
-		this.current = current;
+	public void setPokCurrent(Pokemon pokCurrent) {
+		this.pokCurrent = pokCurrent;
 	}
 
 	public Item[] getItems() {
 		return items;
+	}
+
+	public Item getItemCurrent() {
+		return itemCurrent;
+	}
+
+	public void setItemCurrent(Item itemCurrent) {
+		this.itemCurrent = itemCurrent;
 	}
 	
 }
