@@ -16,6 +16,7 @@ public class Battle extends Controller {
 
 	private class AttackWithCurrent extends Event {
 		private Attack turnChosenAttack;
+		private boolean dead;
 		
 		public AttackWithCurrent(long eventTime, Attack att) {
 			super(eventTime);
@@ -26,10 +27,17 @@ public class Battle extends Controller {
 			int noTurnCurrHp = noTurn.getCurrent().getHp();
 			int dan = turnChosenAttack.getDan();
 			noTurn.getCurrent().setHp(noTurnCurrHp - dan);
+			if (noTurn.getCurrent().getHp() == 0)
+				dead = true;
+			changeTurn();
 		}
 		
 		public String description() {
-			return "";
+			return (turn.getName() + "'s turn: " + "Pokémon " + turn.getCurrent().getName() 
+					+ " attacks (" + turnChosenAttack.getName() + ")!"
+					+ " " + noTurn.getName() + "'s Pokémon " + noTurn.getCurrent().getName()
+					+ " actual HP: " + noTurn.getCurrent().getHp() + "."
+					+ (dead ? " Pokémon " + noTurn.getCurrent().getName() + "" : ""));
 		}
 	}
 	
@@ -44,6 +52,7 @@ public class Battle extends Controller {
 		
 		public void action() {
 			turn.setCurrent(newCurrent);
+			changeTurn();
 		}
 		
 		public String description() {
@@ -66,6 +75,7 @@ public class Battle extends Controller {
 			item.takeOff();
 			if (item.getQuantity() == 0)
 				item = null;
+			changeTurn();
 		}
 		
 		public String description() {
@@ -90,12 +100,44 @@ public class Battle extends Controller {
 	}
 	
 	private class StartBattle extends Event {
+		private Pokemon turnPokCurrent;
+		private Pokemon noTurnPokCurrent;
+		private int p1OrderAtt = 0, p2OrderAtt = 0;
+		private int p1OrderPok = 0, p2OrderPok = 0;
+		private boolean finished = false;
+		
 		public StartBattle(long eventTime) {
 			super(eventTime);
 		}
 		
 		public void action() {
-			
+			while (!finished) {
+				turnPokCurrent = turn.getCurrent();
+				noTurnPokCurrent = noTurn.getCurrent();
+				
+				if (turnPokCurrent.getHp() > 10) {
+					int orderAttack = -1;
+					if (turn == player1) {
+						orderAttack = p1OrderAtt;
+						p1OrderAtt = (p1OrderAtt + 1) % turnPokCurrent.getAttacks().length;
+					} else {
+						orderAttack = p2OrderAtt;
+						p2OrderAtt = (p2OrderAtt + 1) % turnPokCurrent.getAttacks().length;
+					}
+					addEvent(new Battle.AttackWithCurrent(
+							System.currentTimeMillis() + 500,
+							turnPokCurrent.getAttacks()[orderAttack]));
+				} else {
+					if (turnPokCurrent.getHp() == 0) {
+						if (turn == player1) {
+							addEvent(new Battle.ChangeCurrentPokemon(
+									System.currentTimeMillis() + 500,
+									player1.getPokemons()[p1OrderPok]));
+							
+						}
+					}
+				}
+			}
 		}
 		
 		public String description() {
