@@ -4,32 +4,32 @@ import utils.Controller;
 import utils.Event;
 
 public class Battle extends Controller {
-	private Player player1, player2; // player1 always starts the game
+	private Player player1, player2;
 	private Player turn, noTurn;
 	
-	private Battle(Player player1, Player player2) {
+	public Battle(Player player1, Player player2) {
 		this.player1 = player1;
 		this.player2 = player2;
-		this.turn = this.player1;
+		this.turn = this.player1; // player1 always starts the game
 		this.noTurn = this.player2;
 	}
 
 	private class AttackWithCurrent extends Event {
-		private Attack chosenAttack;
+		private Attack turnChosenAttack;
 		
-		public AttackWithCurrent(long eventTime, Attack attack) {
+		public AttackWithCurrent(long eventTime, Attack att) {
 			super(eventTime);
-			chosenAttack = attack;
+			turnChosenAttack = att;
 		}
 		
 		public void action() {
-			int actualRivalPokHP = noTurn.getCurrent().getHp();
-			int attackDan = chosenAttack.getDan();
-			noTurn.getCurrent().setHp(actualRivalPokHP - attackDan);
+			int noTurnCurrHp = noTurn.getCurrent().getHp();
+			int dan = turnChosenAttack.getDan();
+			noTurn.getCurrent().setHp(noTurnCurrHp - dan);
 		}
 		
 		public String description() {
-			return ;
+			return "";
 		}
 	}
 	
@@ -100,6 +100,16 @@ public class Battle extends Controller {
 		
 		public String description() {
 			return "The battle has started!";
+		}
+	}
+	
+	private void changeTurn() {
+		if (turn == player1) {
+			turn = player2;
+			noTurn = player1; 
+		} else {
+			turn = player1;
+			noTurn = player2; 
 		}
 	}
 	
