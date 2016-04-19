@@ -41,13 +41,13 @@ public class Battle extends Controller {
 			
 			if (attdPokCurr.isAlive()) {
 				addEvent(new Battle.AttackWithCurrent(
-						System.currentTimeMillis() + 500,
+						System.currentTimeMillis() + 250,
 						attdAttCurr, attacked, attacker));
 			} else {
 				if (attacked.hasItens()) {
 					// use item
 					addEvent(new Battle.UseItem(
-							System.currentTimeMillis() + 500,
+							System.currentTimeMillis() + 250,
 							attdItemCurr, attacked, attacker));
 				} else {
 					// try to change pokémon
@@ -55,12 +55,12 @@ public class Battle extends Controller {
 					boolean pokemonsAreGone = (attacked.getPokOrder() == attacked.getPokemons().length);
 					if (pokemonsAreGone) {
 						addEvent(new Battle.RunAway(
-								System.currentTimeMillis() + 500,
+								System.currentTimeMillis() + 250,
 								pokemonsAreGone, attacked, attacker));
 					} else {
 						Pokemon newCurrent = attacked.getPokemons()[attacked.getPokOrder()];
 						addEvent(new Battle.ChangeCurrentPokemon(
-								System.currentTimeMillis(),
+								System.currentTimeMillis() + 250,
 								newCurrent, attacked, attacker));
 					}
 				}
@@ -92,7 +92,7 @@ public class Battle extends Controller {
 			changer.setPokCurrent(newCurrent);
 			
 			addEvent(new Battle.AttackWithCurrent(
-					System.currentTimeMillis() + 500,
+					System.currentTimeMillis() + 250,
 					next.getPokCurrent().getAttCurrent(),
 					next, changer));
 		}
@@ -127,7 +127,7 @@ public class Battle extends Controller {
 			}
 			
 			addEvent(new Battle.AttackWithCurrent(
-					System.currentTimeMillis() + 500,
+					System.currentTimeMillis() + 250,
 					next.getPokCurrent().getAttCurrent(),
 					next, user));
 		}
@@ -135,7 +135,7 @@ public class Battle extends Controller {
 		public String description() {
 			return (user.getName() + "'s turn: Pokémon " + user.getPokCurrent().getName() + " earned " + 
 					item.getHpCure() + " HP points (" + user.getPokCurrent().getHp() + " total HP " +
-					"points).");
+					"points), using " + item.getName() + " item.");
 		}
 	}
 	
@@ -175,11 +175,11 @@ public class Battle extends Controller {
 			// if the priorities are equals, the player1 is the first to attack
 			if (p1AttCurr.getPriority() <= p2AttCurr.getPriority()) {
 				addEvent(new Battle.AttackWithCurrent(
-						System.currentTimeMillis() + 500,
+						System.currentTimeMillis() + 250,
 						p1AttCurr, player1, player2));
 			} else {
 				addEvent(new Battle.AttackWithCurrent(
-						System.currentTimeMillis() + 500,
+						System.currentTimeMillis() + 250,
 						p2AttCurr, player2, player1));
 			}
 		}
@@ -198,38 +198,38 @@ public class Battle extends Controller {
 		attacksBulbasaur[1] = new Attack("Tackle", AttackType.NORMAL, 35, 0);
 		attacksBulbasaur[2] = new Attack("Petal Dance", AttackType.PLANT, 70, 2);
 		attacksBulbasaur[3] = new Attack("Razor Leaf", AttackType.PLANT, 55, 1);
-		player1Pokemons[0] = new Pokemon("Bulbasaur", 500, attacksBulbasaur);
+		player1Pokemons[5] = new Pokemon("Bulbasaur", 500, attacksBulbasaur);
 		
 		Attack[] attacksCharmander = new Attack[4];
 		attacksCharmander[0] = new Attack("Ember", AttackType.FIRE, 40, 2);
 		attacksCharmander[1] = new Attack("Flame Thrower", AttackType.FIRE, 95, 2);
 		attacksCharmander[2] = new Attack("Metal Claw", AttackType.METALLIC, 50, 1);
 		attacksCharmander[3] = new Attack("Rage", AttackType.NORMAL, 20, 0);
-		player1Pokemons[1] = new Pokemon("Charmander", 500, attacksCharmander);
+		player1Pokemons[4] = new Pokemon("Charmander", 500, attacksCharmander);
 		
 		Attack[] attacksSandslash = new Attack[3];
 		attacksSandslash[0] = new Attack("Swift", AttackType.NORMAL, 60, 1);
 		attacksSandslash[1] = new Attack("Fury Swipes", AttackType.NORMAL, 35, 0);
 		attacksSandslash[2] = new Attack("Slash", AttackType.NORMAL, 70, 1);
-		player1Pokemons[2] = new Pokemon("Sandslash", 500, attacksSandslash);
+		player1Pokemons[3] = new Pokemon("Sandslash", 500, attacksSandslash);
 		
 		Attack[] attacksPidgey = new Attack[1];
 		attacksPidgey[0] = new Attack("Gust", AttackType.FLIER, 40, 0);
-		player1Pokemons[3] = new Pokemon("Pidgey", 500, attacksPidgey);
+		player1Pokemons[2] = new Pokemon("Pidgey", 500, attacksPidgey);
 		
 		Attack[] attacksPikachu = new Attack[4];
 		attacksPikachu[0] = new Attack("Thunderbolt", AttackType.ELECTRIC, 95, 1);
 		attacksPikachu[1] = new Attack("Quick Attack", AttackType.NORMAL, 40, 0);
 		attacksPikachu[2] = new Attack("Iron Tail", AttackType.METALLIC, 100, 2);
 		attacksPikachu[3] = new Attack("Tackle", AttackType.NORMAL, 35, 0);
-		player1Pokemons[4] = new Pokemon("Pikachu", 500, attacksPikachu);
+		player1Pokemons[1] = new Pokemon("Pikachu", 500, attacksPikachu);
 		
 		Attack[] attacksSquirtle = new Attack[4];
 		attacksSquirtle[0] = new Attack("Bubble", AttackType.WATER, 20, 0);
 		attacksSquirtle[1] = new Attack("Hydro Pump", AttackType.WATER, 120, 2);
 		attacksSquirtle[2] = new Attack("Ice Beam", AttackType.ICE, 95, 1);
 		attacksSquirtle[3] = new Attack("Skull Bash", AttackType.NORMAL, 100, 1);
-		player1Pokemons[5] = new Pokemon("Squirtle", 500, attacksSquirtle);
+		player1Pokemons[0] = new Pokemon("Squirtle", 500, attacksSquirtle);
 		
 		Item[] player1Items = new Item[2];
 		player1Items[0] = new Item("HP Up", 100, 3);

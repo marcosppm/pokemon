@@ -1,7 +1,7 @@
 package utils;
 
 class EventSet {
-	private Event[] events = new Event[100];
+	private Event[] events = new Event[300];
 	private int index = 0;
 	private int next = 0;
 
@@ -29,10 +29,6 @@ class EventSet {
 	public void removeCurrent() {
 		events[next] = null;
 	}
-	
-	public Event[] getEvents() {
-		return events;
-	}
 }
 
 public class Controller {
@@ -51,11 +47,5 @@ public class Controller {
 				es.removeCurrent();
 			}
 		}
-	}
-	
-	public void totalEvents() {
-		int i = 0;
-		for (i = 0; i < es.getEvents().length && es.getEvents()[i] != null; i++);
-		System.out.println(i);
 	}
 }
