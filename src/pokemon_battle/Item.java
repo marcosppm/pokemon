@@ -5,7 +5,7 @@ public class Item {
 	private int hpCure;
 	private int quantity;
 	
-	private Item(String name, int hpCure, int quantity) {
+	public Item(String name, int hpCure, int quantity) {
 		this.name = name;
 		this.hpCure = hpCure;
 		this.quantity = quantity;

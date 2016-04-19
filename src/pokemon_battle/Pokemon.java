@@ -6,7 +6,7 @@ public class Pokemon {
 	private Attack[] attacks;
 	private Attack attCurrent;
 	
-	private Pokemon(String name, int hp, Attack[] attacks) {
+	public Pokemon(String name, int hp, Attack[] attacks) {
 		super();
 		this.name = name;
 		this.hp = hp;

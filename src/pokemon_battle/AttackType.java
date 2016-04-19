@@ -1,6 +1,6 @@
 package pokemon_battle;
 
-public enum TypeAttack {
+public enum AttackType {
 	NORMAL, FIRE, ICE, WATER, ELECTRIC, PLANT, FIGHTER, POISONOUS,
 	OVERLAND, FLIER, PSYCHIC, INSECT, ROCK, GHOST, DRAGON, NOCTURNAL,
 	METALLIC;

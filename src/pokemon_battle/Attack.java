@@ -2,11 +2,11 @@ package pokemon_battle;
 
 public class Attack {
 	private String name;
-	private TypeAttack type;
+	private AttackType type;
 	private int dan;
 	private int priority;
 	
-	public Attack(String name, TypeAttack type, int dan, int priority) {
+	public Attack(String name, AttackType type, int dan, int priority) {
 		this.name = name;
 		this.type = type;
 		this.dan = dan;
@@ -17,7 +17,7 @@ public class Attack {
 		return name;
 	}
 
-	public TypeAttack getType() {
+	public AttackType getType() {
 		return type;
 	}
 	
