@@ -2,7 +2,7 @@ package pokemon_battle;
 
 public class Player {
 	private String name;
-	private Pokemon[] pokemons = new Pokemon[6];
+	private Pokemon[] pokemons;
 	private Pokemon pokCurrent;
 	private Item[] items;
 	private Item itemCurrent;

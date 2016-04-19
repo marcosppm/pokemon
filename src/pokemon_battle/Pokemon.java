@@ -3,7 +3,7 @@ package pokemon_battle;
 public class Pokemon {
 	private String name;
 	private int hp;
-	private Attack[] attacks = new Attack[4];
+	private Attack[] attacks;
 	private Attack attCurrent;
 	
 	private Pokemon(String name, int hp, Attack[] attacks) {

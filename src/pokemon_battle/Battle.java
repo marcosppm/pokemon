@@ -6,6 +6,7 @@ import utils.Event;
 public class Battle extends Controller {
 	private Player player1, player2;
 	private Player turn, noTurn;
+	private TurnType turnType;
 	
 	public Battle(Player player1, Player player2) {
 		this.player1 = player1;
@@ -121,60 +122,123 @@ public class Battle extends Controller {
 			while (!finished) {
 				if (p1PokCurr.isAlive()) {
 					if (p2PokCurr.isAlive()) {
-						
-					} else {
-						if (++p2OrderPok == player2.getPokemons().length) {
-							// the pokémons of player2 are gone...
-							giveTurn(player2);
-							addEvent(new Battle.RunAway(
-									System.currentTimeMillis() + 500,
-									true));
-							giveTurn(player1);
-							finished = true;
-							
-						} else {
-							// player2 will change your pokémon
-							giveTurn(player2);
-							p2PokCurr = player2.getPokemons()[p2OrderPok];
-							addEvent(new Battle.ChangeCurrentPokemon(
-									System.currentTimeMillis() + 500,
-									p2PokCurr));
-							p2OrderAtt = 0;
-							p2AttCurr = p2PokCurr.getAttacks()[0];
-							p2PokCurr.setAttCurrent(p2AttCurr);
-							
-							giveTurn(player1);
-							if (p1PokCurr.getHp() > 20 || !p1hasItems) {
-								// player1 attacks!
-								addEvent(new Battle.AttackWithCurrent(
-										System.currentTimeMillis() + 1000,
-										p1AttCurr));
-								p1OrderAtt = (p1OrderAtt + 1) % p1PokCurr.getAttacks().length;
-								p1AttCurr = p1PokCurr.getAttacks()[p1OrderAtt];
-								p1PokCurr.setAttCurrent(p1AttCurr);
-								
+						if (p1PokCurr.getHp() > 20) { // p1 will attack
+							if (p2PokCurr.getHp() > 20) { // p2 will attack
+								if (p1AttCurr.getPriority() <= p2AttCurr.getPriority()) {
+									turnType = TurnType.P1_PLUS_20_P2_PLUS_20_P1_PRIORITY;
+								} else {
+									turnType = TurnType.P1_PLUS_20_P2_PLUS_20_P2_PRIORITY;
+								}
+							} else { // p2 will not attack
+								turnType = TurnType.P1_PLUS_20_P2_LESS_20;
+							}
+						} else { // p1 will not attack
+							if (p2PokCurr.getHp() > 20) {
+								turnType = TurnType.P1_LESS_20_P2_PLUS_20;
 							} else {
-								// player1 uses item
-								addEvent(new Battle.UseItem(
-										System.currentTimeMillis() + 1000,
-										p1ItemCurr));
-								if (p1ItemCurr.getQuantity() == 0) {
-									if (++p1OrderItem == player1.getItems().length) {
-										p1hasItems = false;
-									} else {
-										p1ItemCurr = player1.getItems()[p1OrderItem];
-										player1.setItemCurrent(p1ItemCurr);
-									}
-								}	
+								turnType = TurnType.P1_LESS_20_P2_LESS_20;
 							}
 						}
+					} else { // p2 dead
+						if (p1PokCurr.getHp() > 20) {
+							turnType = TurnType.P1_PLUS_20_P2_DEAD;
+						} else {
+							turnType = TurnType.P1_LESS_20_P2_DEAD;
+						}
 					}
-				} else {
-					if (p2PokCurr.getHp() > 0) {
+				} else { // p1 dead
+					if (p2PokCurr.isAlive()) {
+						if (p2PokCurr.getHp() > 20) {
+							turnType = TurnType.P1_DEAD_P2_PLUS_20;
+						} else {
+							turnType = TurnType.P1_DEAD_P2_LESS_20;
+						}
+					} else { // p2 dead
+						turnType = TurnType.P1_DEAD_P2_DEAD;
+					}
+				}
+				
+				switch (turnType) {
+				case P1_PLUS_20_P2_PLUS_20_P1_PRIORITY:
+					giveTurn(player1);
+					addEvent(new Battle.AttackWithCurrent(
+							System.currentTimeMillis() + 1000,
+							p1AttCurr));
+					p1OrderAtt = (p1OrderAtt + 1) % p1PokCurr.getAttacks().length;
+					p1AttCurr = p1PokCurr.getAttacks()[p1OrderAtt];
+					p1PokCurr.setAttCurrent(p1AttCurr);
+					
+					giveTurn(player2);
+					break;
+				
+				case P1_PLUS_20_P2_PLUS_20_P2_PRIORITY:
+					break;
+					
+				case P1_PLUS_20_P2_LESS_20:
+					break;
+				
+				case P1_PLUS_20_P2_DEAD:
+					if (++p2OrderPok == player2.getPokemons().length) {
+						// the pokémons of player2 are gone...
+						giveTurn(player2);
+						addEvent(new Battle.RunAway(
+								System.currentTimeMillis() + 500,
+								true));
+						giveTurn(player1);
+						finished = true;
+					}
+					break;
+					
+				case P1_LESS_20_P2_PLUS_20:
+					break;
+					
+				case P1_LESS_20_P2_LESS_20:
+					break;
+					
+				case P1_LESS_20_P2_DEAD:
+					// player2 will change your pokémon
+					giveTurn(player2);
+					p2PokCurr = player2.getPokemons()[p2OrderPok];
+					addEvent(new Battle.ChangeCurrentPokemon(
+							System.currentTimeMillis() + 500,
+							p2PokCurr));
+					p2OrderAtt = 0;
+					p2AttCurr = p2PokCurr.getAttacks()[0];
+					p2PokCurr.setAttCurrent(p2AttCurr);
+					
+					giveTurn(player1);
+					if (p1PokCurr.getHp() > 20 || !p1hasItems) {
+						// player1 attacks!
+						addEvent(new Battle.AttackWithCurrent(
+								System.currentTimeMillis() + 1000,
+								p1AttCurr));
+						p1OrderAtt = (p1OrderAtt + 1) % p1PokCurr.getAttacks().length;
+						p1AttCurr = p1PokCurr.getAttacks()[p1OrderAtt];
+						p1PokCurr.setAttCurrent(p1AttCurr);
 						
 					} else {
-						
+						// player1 uses item
+						addEvent(new Battle.UseItem(
+								System.currentTimeMillis() + 1000,
+								p1ItemCurr));
+						if (p1ItemCurr.getQuantity() == 0) {
+							if (++p1OrderItem == player1.getItems().length) {
+								p1hasItems = false;
+							} else {
+								p1ItemCurr = player1.getItems()[p1OrderItem];
+								player1.setItemCurrent(p1ItemCurr);
+							}
+						}	
 					}
+					break;
+					
+				case P1_DEAD_P2_PLUS_20:
+					break;
+					
+				case P1_DEAD_P2_LESS_20:
+					break;
+					
+				case P1_DEAD_P2_DEAD:
 				}
 			}
 		}
