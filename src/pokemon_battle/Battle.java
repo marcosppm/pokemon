@@ -5,237 +5,187 @@ import utils.Event;
 
 public class Battle extends Controller {
 	private Player player1, player2;
-	private Player turn, noTurn;
-	private FullTurnType fullTurnType;
 	
 	public Battle(Player player1, Player player2) {
 		this.player1 = player1;
 		this.player2 = player2;
-		this.turn = this.player1; // player1 always starts the game
-		this.noTurn = this.player2;
 	}
 
 	private class AttackWithCurrent extends Event {
-		private Attack turnChosenAttack;
+		private Attack attackerChosenAttack;
+		private Player attacker, attacked;
 		private boolean dead;
 		
-		public AttackWithCurrent(long eventTime, Attack att) {
+		public AttackWithCurrent(long eventTime, Attack att, Player attr, Player attd) {
 			super(eventTime);
-			turnChosenAttack = att;
+			attackerChosenAttack = att;
+			attacker = attr;
+			attacked = attd;
 		}
 		
 		public void action() {
-			int noTurnCurrHp = noTurn.getPokCurrent().getHp();
-			int dan = turnChosenAttack.getDan();
-			noTurn.getPokCurrent().setHp(noTurnCurrHp - dan);
-			if (noTurn.getPokCurrent().getHp() == 0)
+			Item attdItemCurr = attacked.getItemCurrent();
+			Pokemon attrPokCurr = attacker.getPokCurrent();
+			Pokemon attdPokCurr = attacked.getPokCurrent();
+			Attack attdAttCurr = attdPokCurr.getAttCurrent();
+			
+			int attackedCurrHp = attacked.getPokCurrent().getHp();
+			int dan = attackerChosenAttack.getDan();
+			attacked.getPokCurrent().setHp(attackedCurrHp - dan);
+			if (attacked.getPokCurrent().getHp() == 0)
 				dead = true;
-		}
-		
-		public String description() {
-			return (turn.getName() + "'s turn: " + "Pokémon " + turn.getPokCurrent().getName() 
-					+ " attacks (" + turnChosenAttack.getName() + ")!"
-					+ " " + noTurn.getName() + "'s Pokémon " + noTurn.getPokCurrent().getName()
-					+ " actual HP: " + noTurn.getPokCurrent().getHp() + "."
-					+ (dead ? " Pokémon " + noTurn.getPokCurrent().getName() + " is dead." : ""));
-		}
-	}
-	
-	private class ChangeCurrentPokemon extends Event {
-		private Pokemon newCurrent, previous;
-		
-		public ChangeCurrentPokemon(long eventTime, Pokemon nc) {
-			super(eventTime);
-			previous = turn.getPokCurrent();
-			newCurrent = nc;
-		}
-		
-		public void action() {
-			turn.setPokCurrent(newCurrent);
-		}
-		
-		public String description() {
-			return (turn.getName() + "'s turn: Pokémon " + previous.getName() + " changed to " + 
-					newCurrent.getName());
-		}
-	}
-	
-	private class UseItem extends Event {
-		private Item item;
-		
-		public UseItem(long eventTime, Item item) {
-			super(eventTime);
-			this.item = item;
-		}
-		
-		public void action() {
-			int actualPokHP = turn.getPokCurrent().getHp();
-			turn.getPokCurrent().setHp(actualPokHP + item.getHpCure());
-			item.takeOff();
-		}
-		
-		public String description() {
-			return (turn.getName() + "'s turn: Pokémon " + turn.getPokCurrent().getName() + " earned " + 
-					item.getHpCure() + " HP points.");
-		}
-	}
-	
-	private class RunAway extends Event {
-		private boolean pokemonsAreGone;
-		
-		public RunAway(long eventTime, boolean pokemonsAreGone) {
-			super(eventTime);
-			this.pokemonsAreGone = pokemonsAreGone;
-		}
-		
-		public void action() {
 			
-		}
-		
-		public String description() {
-			return (turn.getName() + "'s turn: He has fled of the battle... "
-					+ (pokemonsAreGone ? "His/her pokémons are gone. " : "")
-					+ "Player " + noTurn.getName() + " has won!!! :-)");
-		}
-	}
-	
-	private class StartBattle extends Event {
-		private boolean finished = false;
-		
-		public StartBattle(long eventTime) {
-			super(eventTime);
-		}
-		
-		public void action() {
-			int p1OrderPok = 0, p2OrderPok = 0;
-			int p1OrderAtt = 0, p2OrderAtt = 0;
-			int p1OrderItem = 0, p2OrderItem = 0;
-			boolean p1hasItems = true, p2hasItems = true;
+			int proxOrderAtt = (attrPokCurr.getAttOrder() + 1) % attrPokCurr.getAttacks().length;
+			attrPokCurr.setAttOrder(proxOrderAtt);
+			attrPokCurr.setAttCurrent(attrPokCurr.getAttacks()[proxOrderAtt]);
 			
-			Pokemon p1PokCurr = player1.getPokCurrent();
-			Pokemon p2PokCurr = player2.getPokCurrent();
-			Attack p1AttCurr = p1PokCurr.getAttCurrent();
-			Attack p2AttCurr = p2PokCurr.getAttCurrent();
-			Item p1ItemCurr = player1.getItemCurrent();
-			Item p2ItemCurr = player2.getItemCurrent();
-			
-			while (!finished) {
-				// if the priorities are equals, the player1 is the first a attack
-				if (p1AttCurr.getPriority() <= p2AttCurr.getPriority()) {
-					fullTurnType = FullTurnType.P1_ATTACK_P2_ATTACK_P1_PRIORITY;
+			if (attdPokCurr.isAlive()) {
+				addEvent(new Battle.AttackWithCurrent(
+						System.currentTimeMillis() + 500,
+						attdAttCurr, attacked, attacker));
+			} else {
+				if (attacked.hasItens()) {
+					// use item
+					addEvent(new Battle.UseItem(
+							System.currentTimeMillis() + 500,
+							attdItemCurr, attacked, attacker));
 				} else {
-					fullTurnType = FullTurnType.P1_ATTACK_P2_ATTACK_P2_PRIORITY;
-				}
-				
-				switch (fullTurnType) {
-				case P1_ATTACK_P2_ATTACK_P1_PRIORITY:
-					giveTurn(player1);
-					addEvent(new Battle.AttackWithCurrent(
-							System.currentTimeMillis(),
-							p1AttCurr));
-					p1OrderAtt = (p1OrderAtt + 1) % p1PokCurr.getAttacks().length;
-					p1AttCurr = p1PokCurr.getAttacks()[p1OrderAtt];
-					p1PokCurr.setAttCurrent(p1AttCurr);
-					
-					giveTurn(player2);
-					if (p2PokCurr.isAlive()) {
-						addEvent(new Battle.AttackWithCurrent(
-								System.currentTimeMillis(),
-								p2AttCurr));
-						p2OrderAtt = (p2OrderAtt + 1) % p2PokCurr.getAttacks().length;
-						p2AttCurr = p2PokCurr.getAttacks()[p2OrderAtt];
-						p2PokCurr.setAttCurrent(p2AttCurr);
+					// try to change pokémon
+					attacked.setPokOrder(attacked.getPokOrder() + 1);
+					boolean pokemonsAreGone = (attacked.getPokOrder() == attacked.getPokemons().length);
+					if (pokemonsAreGone) {
+						addEvent(new Battle.RunAway(
+								System.currentTimeMillis() + 500,
+								pokemonsAreGone, attacked, attacker));
 					} else {
-						if (p2hasItems) {
-							// use item
-							addEvent(new Battle.UseItem(
-									System.currentTimeMillis(),
-									p2ItemCurr));
-							if (p2ItemCurr.getQuantity() == 0) {
-								if (++p2OrderItem == player2.getItems().length) {
-									p2hasItems = false;
-								} else {
-									p2ItemCurr = player2.getItems()[p2OrderItem];
-								}
-							}
-						} else {
-							// try to change pokémon
-							boolean pokemonsAreGone = (++p2OrderPok == player2.getPokemons().length);
-							if (pokemonsAreGone) {
-								addEvent(new Battle.RunAway(
-										System.currentTimeMillis(),
-										pokemonsAreGone));
-							} else {
-								p2PokCurr = player2.getPokemons()[p2OrderPok];
-								addEvent(new Battle.ChangeCurrentPokemon(
-										System.currentTimeMillis(),
-										p2PokCurr));
-							}
-						}
-					}
-					break;
-				
-				case P1_ATTACK_P2_ATTACK_P2_PRIORITY:
-					giveTurn(player2);
-					addEvent(new Battle.AttackWithCurrent(
-							System.currentTimeMillis(),
-							p2AttCurr));
-					p2OrderAtt = (p2OrderAtt + 1) % p2PokCurr.getAttacks().length;
-					p2AttCurr = p2PokCurr.getAttacks()[p2OrderAtt];
-					p2PokCurr.setAttCurrent(p2AttCurr);
-					
-					giveTurn(player1);
-					if (p1PokCurr.isAlive()) {
-						addEvent(new Battle.AttackWithCurrent(
+						Pokemon newCurrent = attacked.getPokemons()[attacked.getPokOrder()];
+						addEvent(new Battle.ChangeCurrentPokemon(
 								System.currentTimeMillis(),
-								p1AttCurr));
-						p1OrderAtt = (p1OrderAtt + 1) % p1PokCurr.getAttacks().length;
-						p1AttCurr = p1PokCurr.getAttacks()[p1OrderAtt];
-						p1PokCurr.setAttCurrent(p1AttCurr);
-					} else {
-						if (p1hasItems) {
-							// use item
-							addEvent(new Battle.UseItem(
-									System.currentTimeMillis(),
-									p1ItemCurr));
-							if (p1ItemCurr.getQuantity() == 0) {
-								if (++p1OrderItem == player1.getItems().length) {
-									p1hasItems = false;
-								} else {
-									p1ItemCurr = player1.getItems()[p1OrderItem];
-								}
-							}
-						} else {
-							// try to change pokémon
-							boolean pokemonsAreGone = (++p1OrderPok == player1.getPokemons().length);
-							if (pokemonsAreGone) {
-								addEvent(new Battle.RunAway(
-										System.currentTimeMillis(),
-										pokemonsAreGone));
-							} else {
-								p1PokCurr = player1.getPokemons()[p1OrderPok];
-								addEvent(new Battle.ChangeCurrentPokemon(
-										System.currentTimeMillis(),
-										p1PokCurr));
-							}
-						}
+								newCurrent, attacked, attacker));
 					}
 				}
 			}
 		}
 		
 		public String description() {
-			return "The battle has started!";
+			return (attacker.getName() + "'s turn: " + "Pokémon " + attacker.getPokCurrent().getName() 
+					+ " attacks (" + attackerChosenAttack.getName() + ")!"
+					+ " " + attacked.getName() + "'s Pokémon " + attacked.getPokCurrent().getName()
+					+ " actual HP: " + attacked.getPokCurrent().getHp() + "."
+					+ (dead ? " Pokémon " + attacked.getPokCurrent().getName() + " is dead." : ""));
 		}
 	}
 	
-	private void giveTurn(Player pl) {
-		if (pl == player1) {
-			turn = player1;
-			noTurn = player2;
-		} else {
-			turn = player2;
-			noTurn = player1;
+	private class ChangeCurrentPokemon extends Event {
+		private Pokemon newCurrent, previous;
+		private Player changer, next;
+		
+		public ChangeCurrentPokemon(long eventTime, Pokemon nc, Player changer, Player next) {
+			super(eventTime);
+			this.changer = changer;
+			this.previous = changer.getPokCurrent();
+			this.newCurrent = nc;
+			this.next = next;
+		}
+		
+		public void action() {
+			changer.setPokCurrent(newCurrent);
+			
+			addEvent(new Battle.AttackWithCurrent(
+					System.currentTimeMillis() + 500,
+					next.getPokCurrent().getAttCurrent(),
+					next, changer));
+		}
+		
+		public String description() {
+			return (changer.getName() + "'s turn: Pokémon " + previous.getName() + " changed to " + 
+					newCurrent.getName());
+		}
+	}
+	
+	private class UseItem extends Event {
+		private Item item;
+		private Player user, next;
+		
+		public UseItem(long eventTime, Item item, Player user, Player next) {
+			super(eventTime);
+			this.item = item;
+			this.user = user;
+			this.next = next;
+		}
+		
+		public void action() {
+			int actualPokHP = user.getPokCurrent().getHp();
+			user.getPokCurrent().setHp(actualPokHP + item.getHpCure());
+			item.takeOff();
+
+			if (item.getQuantity() == 0) {
+				user.setItemOrder(user.getItemOrder() + 1);
+				if (user.getItemOrder() != player2.getItems().length) {
+					user.setItemCurrent(user.getItems()[user.getItemOrder()]);
+				}
+			}
+			
+			addEvent(new Battle.AttackWithCurrent(
+					System.currentTimeMillis() + 500,
+					next.getPokCurrent().getAttCurrent(),
+					next, user));
+		}
+		
+		public String description() {
+			return (user.getName() + "'s turn: Pokémon " + user.getPokCurrent().getName() + " earned " + 
+					item.getHpCure() + " HP points (" + user.getPokCurrent().getHp() + " total HP " +
+					"points).");
+		}
+	}
+	
+	private class RunAway extends Event {
+		private boolean pokemonsAreGone;
+		private Player loser, winner;
+		
+		public RunAway(long eventTime, boolean pokemonsAreGone, Player loser, Player winner) {
+			super(eventTime);
+			this.loser = loser;
+			this.winner = winner;
+			this.pokemonsAreGone = pokemonsAreGone;
+		}
+		
+		public void action() {
+			// no events added anymore, the battle is finished!
+		}
+		
+		public String description() {
+			return (loser.getName() + "'s turn: He has fled of the battle... "
+					+ (pokemonsAreGone ? "His/her pokémons are gone. " : "")
+					+ "Player " + winner.getName() + " has won!!! :-)");
+		}
+	}
+	
+	private class StartBattle extends Event {
+		public StartBattle(long eventTime) {
+			super(eventTime);
+		}
+		
+		public void action() {
+			Pokemon p1PokCurr = player1.getPokCurrent();
+			Pokemon p2PokCurr = player2.getPokCurrent();
+			Attack p1AttCurr = p1PokCurr.getAttCurrent();
+			Attack p2AttCurr = p2PokCurr.getAttCurrent();
+			
+			// if the priorities are equals, the player1 is the first to attack
+			if (p1AttCurr.getPriority() <= p2AttCurr.getPriority()) {
+				addEvent(new Battle.AttackWithCurrent(
+						System.currentTimeMillis() + 500,
+						p1AttCurr, player1, player2));
+			} else {
+				addEvent(new Battle.AttackWithCurrent(
+						System.currentTimeMillis() + 500,
+						p2AttCurr, player2, player1));
+			}
+		}
+		
+		public String description() {
+			return "The battle has started!";
 		}
 	}
 	
@@ -334,7 +284,7 @@ public class Battle extends Controller {
 		player2Items[0] = new Item("HP Up", 100, 2);
 		player2Items[1] = new Item("Health Wing", 150, 2);
 		
-		player1 = new Player("Lucas Seiji", player2Pokemons, player2Items);
+		player2 = new Player("Lucas Seiji", player2Pokemons, player2Items);
 	}
 	
 	public static void main(String[] args) {
