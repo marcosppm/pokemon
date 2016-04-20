@@ -7,14 +7,16 @@ public class Pokemon {
 	private Attack[] attacks;
 	private Attack attCurrent;
 	private int attOrder;
+	private AttackType type;
 	
-	public Pokemon(String name, int hp, Attack[] attacks) {
+	public Pokemon(String name, int hp, Attack[] attacks, AttackType type) {
 		super();
 		this.name = name;
 		this.hp = hp;
 		this.attacks = attacks;
 		this.attCurrent = this.attacks[0];
 		this.attOrder = 0;
+		this.type = type;
 	}
 
 	public String getName() {
@@ -55,6 +57,10 @@ public class Pokemon {
 
 	public void setAttOrder(int attOrder) {
 		this.attOrder = attOrder;
+	}
+
+	public AttackType getType() {
+		return type;
 	}
 
 }
