@@ -31,6 +31,10 @@ public class Item {
 		return quantity;
 	}
 	
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
 	public void takeOff() {
 		this.quantity--;
 	}

@@ -3,11 +3,11 @@ package pokemon_battle;
 public class Pokemon {
 	private String name;
 	private int hp;
+	private AttackType type;
 	
 	private Attack[] attacks;
 	private Attack attCurrent;
 	private int attOrder;
-	private AttackType type;
 	
 	public Pokemon(String name, int hp, Attack[] attacks, AttackType type) {
 		super();
@@ -41,6 +41,10 @@ public class Pokemon {
 
 	public Attack[] getAttacks() {
 		return attacks;
+	}
+
+	public void setAttacks(Attack[] attacks) {
+		this.attacks = attacks;
 	}
 
 	public Attack getAttCurrent() {
