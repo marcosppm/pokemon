@@ -5,7 +5,7 @@ public class Attack {
 	private AttackType type;
 	private int dan;
 	private int priority;
-	
+	private int nada = 0;
 	public Attack(String name, AttackType type, int dan, int priority) {
 		this.name = name;
 		this.type = type;
