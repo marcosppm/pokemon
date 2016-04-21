@@ -14,11 +14,22 @@ public class Player {
 	public Player(String name, Pokemon[] pokemons, Item[] items) {
 		this.name = name;
 		this.pokemons = pokemons;
-		this.pokCurrent = this.pokemons[0];
-		this.pokOrder = 0;
+		if (hasPokemons()) {
+			this.pokCurrent = this.pokemons[0];
+			this.pokOrder = 0;
+		} else {
+			this.pokCurrent = null;
+			this.pokOrder = -1;
+		}
+		
 		this.items = items;
-		this.itemCurrent = this.items[0];
-		this.itemOrder = 0;
+		if (hasItens()) {
+			this.itemCurrent = this.items[0];
+			this.itemOrder = 0;
+		} else {
+			this.itemCurrent = null;
+			this.itemOrder = -1;
+		}
 	}
 
 	public String getName() {
@@ -27,6 +38,23 @@ public class Player {
 
 	public Pokemon[] getPokemons() {
 		return pokemons;
+	}
+
+	public void setPokemons(Pokemon[] pokemons) {
+		this.pokemons = pokemons;
+	}
+	
+	public boolean hasPokemons() {
+		boolean hasPokemons = false;
+		
+		for (Pokemon pok : this.pokemons) {
+			if (pok != null) {
+				hasPokemons = true;
+				break;
+			}
+		}
+		
+		return hasPokemons;
 	}
 
 	public Pokemon getPokCurrent() {
@@ -39,6 +67,10 @@ public class Player {
 
 	public Item[] getItems() {
 		return items;
+	}
+
+	public void setItems(Item[] items) {
+		this.items = items;
 	}
 	
 	public boolean hasItens() {
