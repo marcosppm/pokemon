@@ -72,6 +72,10 @@ public class Player {
 	public void setItems(Item[] items) {
 		this.items = items;
 	}
+
+	public void setItems(Item[] items) {
+		this.items = items;
+	}
 	
 	public boolean hasItens() {
 		boolean hasItens = false;
