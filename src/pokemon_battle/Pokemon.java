@@ -4,12 +4,13 @@ public class Pokemon {
 	private String name;
 	private int hp;
 	private AttackType type;
+	private int catchRate;
 	
 	private Attack[] attacks;
 	private Attack attCurrent;
 	private int attOrder;
 	
-	public Pokemon(String name, int hp, Attack[] attacks, AttackType type) {
+	public Pokemon(String name, int hp, Attack[] attacks, AttackType type, int catchRate) {
 		super();
 		this.name = name;
 		this.hp = hp;
@@ -17,6 +18,7 @@ public class Pokemon {
 		this.attCurrent = this.attacks[0];
 		this.attOrder = 0;
 		this.type = type;
+		this.catchRate = catchRate;
 	}
 
 	public String getName() {
@@ -65,6 +67,10 @@ public class Pokemon {
 
 	public AttackType getType() {
 		return type;
+	}
+
+	public int getCatchRate() {
+		return catchRate;
 	}
 
 }

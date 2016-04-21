@@ -2,6 +2,7 @@ package pokemon_battle;
 
 public class Player {
 	private String name;
+	private boolean isWildPokemon;
 	
 	private Pokemon[] pokemons;
 	private Pokemon pokCurrent;
@@ -11,29 +12,28 @@ public class Player {
 	private Item itemCurrent;
 	private int itemOrder;
 	
-	public Player(String name, Pokemon[] pokemons, Item[] items) {
+	private Pokeball[] pokeballs;
+	private Pokeball pokeballFree;
+	private int pokeballFreeOrder;
+	
+	public Player(String name, Pokemon[] pokemons, Item[] items, Pokeball[] pokeballs,
+			boolean isWildPokemon) {
 		this.name = name;
+		this.isWildPokemon = isWildPokemon;
 		this.pokemons = pokemons;
-		if (hasPokemons()) {
-			this.pokCurrent = this.pokemons[0];
-			this.pokOrder = 0;
-		} else {
-			this.pokCurrent = null;
-			this.pokOrder = -1;
-		}
-		
+		setInitialPokCurrent();
 		this.items = items;
-		if (hasItens()) {
-			this.itemCurrent = this.items[0];
-			this.itemOrder = 0;
-		} else {
-			this.itemCurrent = null;
-			this.itemOrder = -1;
-		}
+		setInitialItemCurrent();
+		this.pokeballs = pokeballs;
+		setNextPokeballFree();
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public boolean isWildPokemon() {
+		return isWildPokemon;
 	}
 
 	public Pokemon[] getPokemons() {
@@ -61,16 +61,30 @@ public class Player {
 		return pokCurrent;
 	}
 
+	public void setInitialPokCurrent() {
+		if (hasPokemons()) {
+			this.pokCurrent = this.pokemons[0];
+			this.pokOrder = 0;
+		} else {
+			this.pokCurrent = null;
+			this.pokOrder = -1;
+		}
+	}
+
 	public void setPokCurrent(Pokemon pokCurrent) {
 		this.pokCurrent = pokCurrent;
 	}
 
-	public Item[] getItems() {
-		return items;
+	public int getPokOrder() {
+		return pokOrder;
 	}
 
-	public void setItems(Item[] items) {
-		this.items = items;
+	public void setPokOrder(int pokOrder) {
+		this.pokOrder = pokOrder;
+	}
+
+	public Item[] getItems() {
+		return items;
 	}
 
 	public void setItems(Item[] items) {
@@ -94,16 +108,18 @@ public class Player {
 		return itemCurrent;
 	}
 
+	public void setInitialItemCurrent() {
+		if (hasItens()) {
+			this.itemCurrent = this.items[0];
+			this.itemOrder = 0;
+		} else {
+			this.itemCurrent = null;
+			this.itemOrder = -1;
+		}
+	}
+
 	public void setItemCurrent(Item itemCurrent) {
 		this.itemCurrent = itemCurrent;
-	}
-
-	public int getPokOrder() {
-		return pokOrder;
-	}
-
-	public void setPokOrder(int pokOrder) {
-		this.pokOrder = pokOrder;
 	}
 
 	public int getItemOrder() {
@@ -112,6 +128,58 @@ public class Player {
 
 	public void setItemOrder(int itemOrder) {
 		this.itemOrder = itemOrder;
+	}
+
+	public Pokeball[] getPokeballs() {
+		return pokeballs;
+	}
+
+	public void setPokeballs(Pokeball[] pokeballs) {
+		this.pokeballs = pokeballs;
+	}
+	
+	public boolean hasPokeballs() {
+		boolean hasPokeballs = false;
+		
+		for (Pokeball pb : this.pokeballs) {
+			if (pb != null) {
+				hasPokeballs = true;
+				break;
+			}
+		}
+		
+		return hasPokeballs;
+	}
+
+	public Pokeball getPokeballFree() {
+		return pokeballFree;
+	}
+	
+	public void setNextPokeballFree() {
+		Pokeball pb = null;
+		pokeballFree = null;
+		pokeballFreeOrder = -1;
+		boolean hasPokeballs = hasPokeballs();
+		for (int i = 0; hasPokeballs && i < pokeballs.length; i++) {
+			pb = pokeballs[i];
+			if (!pb.hasWildStored()) {
+				pokeballFree = pb;
+				pokeballFreeOrder = i;
+				break;
+			}
+		}
+	}
+
+	public void setPokeballFree(Pokeball pokeballFree) {
+		this.pokeballFree = pokeballFree;
+	}
+
+	public int getPokeballFreeOrder() {
+		return pokeballFreeOrder;
+	}
+
+	public void setPokeballFreeOrder(int pokeballFreeOrder) {
+		this.pokeballFreeOrder = pokeballFreeOrder;
 	}
 	
 }
