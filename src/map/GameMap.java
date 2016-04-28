@@ -82,7 +82,7 @@ public class GameMap extends Controller {
 
 		public String description() {
 			return player.getName() + " has walked 100 meters on the grass..."
-				   + (foundWildPokemon ? " And has found a Wild Pokémon!!" : "");
+				   + (foundWildPokemon ? " And has found a Wild PokÃ©mon!!" : "");
 		}
 	}
 	
@@ -141,7 +141,7 @@ public class GameMap extends Controller {
 		playerItems[1] = new Item("Health Wing", 150, 2);
 		
 		Pokeball[] player2Pokeballs = new Pokeball[3];
-		player2Pokeballs[0] = new Pokeball("Poké ball", 1);
+		player2Pokeballs[0] = new Pokeball("Pokï¿½ ball", 1);
 		player2Pokeballs[1] = new Pokeball("Great ball", 1.5);
 		player2Pokeballs[2] = new Pokeball("Ultra ball", 2);
 		
@@ -149,7 +149,7 @@ public class GameMap extends Controller {
 	}
 	
 	private void createWildPokemon() {
-		// wild pokémon
+		// wild pokï¿½mon
 		Pokemon[] wildPokemon = new Pokemon[1];
 		
 		Attack[] attacksPikachu = new Attack[4];
@@ -164,7 +164,7 @@ public class GameMap extends Controller {
 		
 		Pokeball[] wildPokPokeballs = {};
 		
-		this.wildPokemon = new Player("Wild Pokémon", wildPokemon, wildPokemonItems, 
+		this.wildPokemon = new Player("Wild Pokï¿½mon", wildPokemon, wildPokemonItems, 
 				wildPokPokeballs, true);
 	}
 	
@@ -176,7 +176,7 @@ public class GameMap extends Controller {
 		long tm = System.currentTimeMillis();
 		gmap.addEvent(gmap.new WalkOnFloor(tm));
 		gmap.run(); // starts walking
-		// when finishes walking, finds a wild pokémon to fight 
+		// when finishes walking, finds a wild pokï¿½mon to fight 
 		gmap.currentWildBattle.addEvent(gmap.currentWildBattle.
 				new StartBattle(System.currentTimeMillis() + DELAY_OF_EVENT));
 		gmap.currentWildBattle.run();

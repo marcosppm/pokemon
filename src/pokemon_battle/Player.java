@@ -1,5 +1,7 @@
 package pokemon_battle;
 
+import map.Map;
+
 public class Player {
 	private String name;
 	private boolean isWildPokemon;
@@ -16,6 +18,8 @@ public class Player {
 	private Pokeball pokeballFree;
 	private int pokeballFreeOrder;
 	
+	private int x, y; 
+	
 	public Player(String name, Pokemon[] pokemons, Item[] items, Pokeball[] pokeballs,
 			boolean isWildPokemon) {
 		this.name = name;
@@ -26,6 +30,8 @@ public class Player {
 		setInitialItemCurrent();
 		this.pokeballs = pokeballs;
 		setNextPokeballFree();
+		this.x = Map.getComprimento() / 2;
+		this.y = Map.getLargura() / 2;
 	}
 
 	public String getName() {
@@ -180,6 +186,22 @@ public class Player {
 
 	public void setPokeballFreeOrder(int pokeballFreeOrder) {
 		this.pokeballFreeOrder = pokeballFreeOrder;
+	}
+
+	public int getX() {
+		return x;
+	}
+	
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public void setY(int y) {
+		this.y = y;
 	}
 	
 }

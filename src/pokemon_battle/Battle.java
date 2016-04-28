@@ -59,13 +59,13 @@ public class Battle extends Controller {
 						addEvent(new Battle.AttackWithCurrent(
 								System.currentTimeMillis() + DELAY_OF_EVENT,
 								attdAttCurr, attacked, attacker));
-					} else { // it's possible to use pokéballs!
+					} else { // it's possible to use pokÃ©balls!
 						Random random = new Random();
 						int randomNumber = random.nextInt(INITIAL_HP) + 1;
 						int wildPokHp = attacked.getPokCurrent().getHp();
 						int chanceOfUsingPokeball = INITIAL_HP - wildPokHp;
 						if (randomNumber <= chanceOfUsingPokeball) {
-							// use pokéball
+							// use pokÃ©ball
 							willUsePokeball = true;
 							addEvent(new Battle.UsePokeball(
 									System.currentTimeMillis() + DELAY_OF_EVENT,
@@ -87,7 +87,7 @@ public class Battle extends Controller {
 							System.currentTimeMillis() + DELAY_OF_EVENT,
 							attdItemCurr, attacked, attacker));
 				} else {
-					// try to change pokémon
+					// try to change pokÃ©mon
 					attacked.setPokOrder(attacked.getPokOrder() + 1);
 					boolean pokemonsAreGone = (attacked.getPokOrder() == attacked.getPokemons().length);
 					if (pokemonsAreGone) {
@@ -107,13 +107,13 @@ public class Battle extends Controller {
 		public String description() {
 			String descr = null;
 			if (!willUsePokeball) {
-				descr = (attacker.getName() + "'s turn: " + "Pokémon " + attacker.getPokCurrent().getName() 
+				descr = (attacker.getName() + "'s turn: " + "PokÃ©mon " + attacker.getPokCurrent().getName() 
 						+ " attacks (" + attackerChosenAttack.getName() + " with multiplier " + multiplier
-						+ ")! " + attacked.getName() + "'s Pokémon " + attacked.getPokCurrent().getName()
+						+ ")! " + attacked.getName() + "'s PokÃ©mon " + attacked.getPokCurrent().getName()
 						+ " actual HP: " + attacked.getPokCurrent().getHp() + "."
-						+ (dead ? " Pokémon " + attacked.getPokCurrent().getName() + " is dead." : ""));
+						+ (dead ? " PokÃ©mon " + attacked.getPokCurrent().getName() + " is dead." : ""));
 			} else {
-				descr = (attacker.getName() + " will use pokéball!");
+				descr = (attacker.getName() + " will use pokÃ©ball!");
 			}
 			return descr;
 		}
@@ -164,7 +164,7 @@ public class Battle extends Controller {
 
 		public String description() {
 			String wildPokemonName = wildPokemon.getPokCurrent().getName();
-			return (user.getName() + "'s turn: He throws a Pokéball " + chosenPokeball.getName()
+			return (user.getName() + "'s turn: He throws a PokÃ©ball " + chosenPokeball.getName()
 					+ " against " + wildPokemonName + ". ")
 					+ (success ? "He's got " + wildPokemonName + "!" : "He couldn't get " 
 					+ wildPokemonName + "...");
@@ -193,7 +193,7 @@ public class Battle extends Controller {
 		}
 		
 		public String description() {
-			return (changer.getName() + "'s turn: Pokémon " + previous.getName() + " changed to " + 
+			return (changer.getName() + "'s turn: PokÃ©mon " + previous.getName() + " changed to " + 
 					newCurrent.getName());
 		}
 	}
@@ -228,7 +228,7 @@ public class Battle extends Controller {
 		}
 		
 		public String description() {
-			return (user.getName() + "'s turn: Pokémon " + user.getPokCurrent().getName() + " earned " + 
+			return (user.getName() + "'s turn: PokÃ©mon " + user.getPokCurrent().getName() + " earned " + 
 					item.getHpCure() + " HP points (" + user.getPokCurrent().getHp() + " total HP " +
 					"points), using " + item.getName() + " item.");
 		}
@@ -254,16 +254,16 @@ public class Battle extends Controller {
 		public String description() {
 			if (!wild) {
 				return (loser.getName() + "'s turn: He has fled of the battle... "
-						+ (pokemonsAreGone ? "His/her pokémons are gone. " : "")
+						+ (pokemonsAreGone ? "His/her pokÃ©mons are gone. " : "")
 						+ "Player " + winner.getName() + " has won!!! :-)");
 			} else {
 				if (winner.isWildPokemon()) {
 					return (loser.getName() + "'s turn: "
-							+ "Player " + loser.getName() + " has lost to the wild pokémon " 
+							+ "Player " + loser.getName() + " has lost to the wild pokÃ©mon " 
 							+ winner.getPokCurrent().getName() + "...");
 				} else {
 					return (loser.getName() + "'s turn: "
-							+ (hasBeenCaught ? "The wild pokémon has been caught! " : "He's dead... ")
+							+ (hasBeenCaught ? "The wild pokÃ©mon has been caught! " : "He's dead... ")
 							+ "Player " + winner.getName() + " has won!!! :-)");
 				}
 			}
@@ -304,7 +304,7 @@ public class Battle extends Controller {
 			if (everybodyHasPokemons) {
 				return "The battle has started!";
 			} else {
-				return "There are players without pokémons. The battle couldn't be started... :-(";
+				return "There are players without pokÃ©mons. The battle couldn't be started... :-(";
 			}
 		}
 	}
