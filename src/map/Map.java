@@ -2,7 +2,7 @@ package map;
 
 import java.util.Random;
 
-public class Map extends Object {
+public class Map {
 	private final static int LENGTH = 10;
 	private final static int WIDTH = 10;
 	
