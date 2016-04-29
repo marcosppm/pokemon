@@ -2,6 +2,8 @@ package map;
 
 import java.util.Random;
 
+import map.Map.Direction;
+import map.Map.Floor;
 import pokemon_battle.Attack;
 import pokemon_battle.AttackType;
 import pokemon_battle.Battle;
@@ -14,75 +16,108 @@ import utils.Event;
 
 public class GameMap extends Controller {
 	private Player player, wildPokemon;
-	private int stepsOnTheFloor, stepsOnTheGrass;
+	private int stepsOnGrass;
 	private int chanceWildBattle; // from 0 to 80
 	private Battle currentWildBattle;
 	
 	private static final int DELAY_OF_EVENT = 1500;
 	private static final int INITIAL_HP = 500;
 	
-	public GameMap() {
-		this.stepsOnTheFloor = 0;
-		this.chanceWildBattle = 0;
-	}
-
-	private class WalkOnFloor extends Event {
-		public WalkOnFloor(long eventTime) {
-			super(eventTime);
-		}
-		
-		public void action() {
-			if (stepsOnTheFloor < 3) {
-				stepsOnTheFloor++;
-				addEvent(new GameMap.WalkOnFloor(
-						System.currentTimeMillis() + DELAY_OF_EVENT));
-			} else {
-				stepsOnTheFloor = 0;
-				addEvent(new GameMap.WalkOnGrass(
-						System.currentTimeMillis() + DELAY_OF_EVENT));
-			}
-		}
-
-		public String description() {
-			return (player.getName() + " has walked 100 meters on the floor...");
-		}
-	}
-	
-	private class WalkOnGrass extends Event {
+	private class Walk extends Event {
 		private boolean foundWildPokemon;
-
-		public WalkOnGrass(long eventTime) {
+		private Floor whereWalked;
+		private int actualX, actualY;
+		
+		public Walk(long eventTime) {
 			super(eventTime);
 			this.foundWildPokemon = false;
 		}
 		
 		public void action() {
-			if (stepsOnTheGrass < 5) {
-				Random random = new Random();
-				int randomNumber = random.nextInt(100) + 1;
-				if (randomNumber <= chanceWildBattle) {
-					stepsOnTheGrass = 0;
-					chanceWildBattle = 0;
-					foundWildPokemon = true;
-					boolean wild = true;
-					currentWildBattle = new Battle(player, wildPokemon, wild);					
-				} else {
-					stepsOnTheGrass++;
-					chanceWildBattle = 20 * stepsOnTheGrass;
-					addEvent(new GameMap.WalkOnGrass(
-							System.currentTimeMillis() + DELAY_OF_EVENT));
+			int x = player.getX();
+			int y = player.getY();
+			actualX = x;
+			actualY = y;
+			whereWalked = Map.getFloor(x, y);
+			switch (whereWalked) {
+			case GRASS:
+				if (stepsOnGrass < 5) {
+					Random random = new Random();
+					int randomNumber = random.nextInt(100) + 1;
+					if (randomNumber <= chanceWildBattle) {
+						stepsOnGrass = 0;
+						chanceWildBattle = 0;
+						foundWildPokemon = true;
+						boolean wild = true;
+						currentWildBattle = new Battle(player, wildPokemon, wild);					
+					} else {
+						stepsOnGrass++;
+						chanceWildBattle = 20 * stepsOnGrass;
+						walk();
+						addEvent(new GameMap.Walk(
+								System.currentTimeMillis() + DELAY_OF_EVENT));
+					}
 				}
-			} else {
-				stepsOnTheGrass = 0;
-				chanceWildBattle = 0;
-				addEvent(new GameMap.WalkOnFloor(
+				break;
+				
+			case GROUND:
+				walk();
+				addEvent(new GameMap.Walk(
 						System.currentTimeMillis() + DELAY_OF_EVENT));
 			}
 		}
+		
+		private void walk() {
+			int x = player.getX();
+			int y = player.getY();
+			Direction dir;
+			do {
+				dir = Map.randomDirection();
+			} while (!possiblePath(dir, x, y));
+			
+			switch (dir) {
+			case DOWN:
+				player.setY(y + 1);
+				break;
+				
+			case LEFT:
+				player.setX(x - 1);
+				break;
+				
+			case RIGHT:
+				player.setX(x + 1);
+				break;
+				
+			case UP:
+				player.setY(y - 1);
+			}
+		}
+
+		private boolean possiblePath(Direction dir, int x, int y) {
+			if (x == 0 && dir == Direction.LEFT ||
+				x == Map.getLength() - 1 && dir == Direction.RIGHT ||
+				y == 0 && dir == Direction.UP ||
+				y == Map.getWidth() - 1 && dir == Direction.DOWN) {
+				return false;
+			}
+			return true;
+		}
 
 		public String description() {
-			return player.getName() + " has walked 100 meters on the grass..."
-				   + (foundWildPokemon ? " And has found a Wild Pokémon!!" : "");
+			String msg = "";
+			
+			switch (whereWalked) {
+			case GRASS:
+				msg = player.getName() + " has walked on the grass..."
+					  + (foundWildPokemon ? " And has found a Wild Pokemon!!\n" : "\n");
+				break;
+				
+			case GROUND:
+				msg = player.getName() + " has walked on the ground...\n";
+			}
+			Map.printMap(actualX, actualY);
+			
+			return msg;
 		}
 	}
 	
@@ -141,7 +176,7 @@ public class GameMap extends Controller {
 		playerItems[1] = new Item("Health Wing", 150, 2);
 		
 		Pokeball[] player2Pokeballs = new Pokeball[3];
-		player2Pokeballs[0] = new Pokeball("Pok� ball", 1);
+		player2Pokeballs[0] = new Pokeball("Poke ball", 1);
 		player2Pokeballs[1] = new Pokeball("Great ball", 1.5);
 		player2Pokeballs[2] = new Pokeball("Ultra ball", 2);
 		
@@ -149,7 +184,7 @@ public class GameMap extends Controller {
 	}
 	
 	private void createWildPokemon() {
-		// wild pok�mon
+		// wild pokemon
 		Pokemon[] wildPokemon = new Pokemon[1];
 		
 		Attack[] attacksPikachu = new Attack[4];
@@ -164,7 +199,7 @@ public class GameMap extends Controller {
 		
 		Pokeball[] wildPokPokeballs = {};
 		
-		this.wildPokemon = new Player("Wild Pok�mon", wildPokemon, wildPokemonItems, 
+		this.wildPokemon = new Player("Wild Pokemon", wildPokemon, wildPokemonItems, 
 				wildPokPokeballs, true);
 	}
 	
@@ -173,13 +208,13 @@ public class GameMap extends Controller {
 		GameMap gmap = new GameMap();
 		gmap.createPlayer();
 		gmap.createWildPokemon();
+		Map.generateMap();
 		long tm = System.currentTimeMillis();
-		gmap.addEvent(gmap.new WalkOnFloor(tm));
+		gmap.addEvent(gmap.new Walk(tm));
 		gmap.run(); // starts walking
-		// when finishes walking, finds a wild pok�mon to fight 
+		// when finishes walking, finds a wild pokemon to fight 
 		gmap.currentWildBattle.addEvent(gmap.currentWildBattle.
 				new StartBattle(System.currentTimeMillis() + DELAY_OF_EVENT));
 		gmap.currentWildBattle.run();
 	}
-	
 }

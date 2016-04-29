@@ -30,8 +30,8 @@ public class Player {
 		setInitialItemCurrent();
 		this.pokeballs = pokeballs;
 		setNextPokeballFree();
-		this.x = Map.getComprimento() / 2;
-		this.y = Map.getLargura() / 2;
+		this.x = Map.getLength() / 2;
+		this.y = Map.getWidth() / 2;
 	}
 
 	public String getName() {
